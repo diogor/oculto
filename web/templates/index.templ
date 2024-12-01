@@ -2,6 +2,37 @@ package templates
 
 templ Index() {
     @Base() {
-        <button>Criar Jogo</button>
+    <main id="component">
+    </main>
+    <script>
+        var component = document.getElementById("component");
+        var form = document.getElementById("create_form");
+
+        var players = [];
+
+        function addPlayer(e) {
+            e.preventDefault();
+
+            var name = document.getElementById("player").value;
+            players.push(name);
+            document.getElementById("player").value = "";
+        }
+
+        m.mount(component, {
+            view: () => [
+                m("h1", "Criar Amigo Oculto"),
+                m("form", {action: "/create-game", method: "POST"}, [
+                    m("input", {type: "text", name: "name", id: "name", placeholder: "Escolha um nome para o amigo oculto"}),
+                    m("input", {type: "hidden", name: "players", value: players}),
+                    [
+                        m("ul", players.map((player) => m("li", player)))
+                    ],
+                    m("input", {type: "text", name: "player", id: "player", placeholder: "Nome do participante"}),
+                    m("button", {type: "button", onclick: addPlayer}, "Adicionar"),
+                    m("button", {type: "submit"}, "Criar")
+                ])
+            ]
+        })
+    </script>
     }
 }

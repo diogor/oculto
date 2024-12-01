@@ -41,7 +41,7 @@ func Index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button>Criar Jogo</button>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"component\"></main><script>\r\n        var component = document.getElementById(\"component\");\r\n        var form = document.getElementById(\"create_form\");\r\n\r\n        var players = [];\r\n\r\n        function addPlayer(e) {\r\n            e.preventDefault();\r\n\r\n            var name = document.getElementById(\"player\").value;\r\n            players.push(name);\r\n            document.getElementById(\"player\").value = \"\";\r\n        }\r\n\r\n        m.mount(component, {\r\n            view: () => [\r\n                m(\"h1\", \"Criar Amigo Oculto\"),\r\n                m(\"form\", {action: \"/create-game\", method: \"POST\"}, [\r\n                    m(\"input\", {type: \"text\", name: \"name\", id: \"name\", placeholder: \"Escolha um nome para o amigo oculto\"}),\r\n                    m(\"input\", {type: \"hidden\", name: \"players\", value: players}),\r\n                    [\r\n                        m(\"ul\", players.map((player) => m(\"li\", player)))\r\n                    ],\r\n                    m(\"input\", {type: \"text\", name: \"player\", id: \"player\", placeholder: \"Nome do participante\"}),\r\n                    m(\"button\", {type: \"button\", onclick: addPlayer}, \"Adicionar\"),\r\n                    m(\"button\", {type: \"submit\"}, \"Criar\")\r\n                ])\r\n            ]\r\n        })\r\n    </script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

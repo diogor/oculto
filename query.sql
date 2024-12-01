@@ -16,6 +16,10 @@ INSERT INTO player (id, name, game_id)
 VALUES ($1, $2, $3)
 RETURNING *;
 
+-- name: CreatePlayers :copyfrom
+INSERT INTO player (id, name, game_id)
+VALUES ($1, $2, $3);
+
 -- name: CreatePick :one
 INSERT INTO pick (id, game_id, picked_by, player_id)
 VALUES ($1, $2, $3, $4)

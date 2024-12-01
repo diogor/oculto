@@ -84,6 +84,12 @@ func (q *Queries) CreatePlayer(ctx context.Context, arg CreatePlayerParams) (Pla
 	return i, err
 }
 
+type CreatePlayersParams struct {
+	ID     uuid.UUID
+	Name   string
+	GameID uuid.UUID
+}
+
 const getPlayersForGame = `-- name: GetPlayersForGame :many
 SELECT id, name, game_id, has_picked, is_picked FROM player
 WHERE game_id = $1
