@@ -2,16 +2,19 @@ package web
 
 import (
 	"context"
-	"fmt"
 	"github.com/diogor/oculto/orm"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"strings"
 )
 
 func CreateGameHandler(c *fiber.Ctx) error {
 	name := c.FormValue("name")
-	fmt.Println(c.Context().PostArgs())
+	players := c.FormValue("players")
+
+	playerList := strings.Split(players, ",")
+
 	var id uuid.UUID
 	var err error
 	var game orm.Game
@@ -41,6 +44,24 @@ func CreateGameHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
+
+	var createPlayersParams []orm.CreatePlayersParams
+
+	for _, player := range playerList {
+		var playerID uuid.UUID
+		playerID, err = uuid.NewV7()
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+
+		createPlayersParams = append(createPlayersParams, orm.CreatePlayersParams{
+			ID:     playerID,
+			Name:   player,
+			GameID: game.ID,
+		})
+	}
+
+	queries.CreatePlayers(c.Context(), createPlayersParams)
 
 	return c.Redirect("/" + game.ID.String())
 }
