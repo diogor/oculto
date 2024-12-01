@@ -1,0 +1,20 @@
+package templates
+
+import (
+	"github.com/diogor/oculto/orm"
+)
+
+templ Game(game orm.Game, players []orm.Player) {
+    @Base() {
+        <main id="component" class="container">
+            <h1>{ game.Name }</h1>
+            <select name="select" aria-label="Select" required>
+                <option selected disabled value="">Selecione seu pr&oacute;prio nome</option>
+                    for _, player := range players {
+                        <option>{ player.Name }</option>
+                    }
+            </select>
+            <button>Sortear amigo oculto</button>
+        </main>
+    }
+}

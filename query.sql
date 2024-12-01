@@ -2,6 +2,10 @@
 SELECT * FROM player
 WHERE game_id = $1;
 
+-- name: GetGame :one
+SELECT * FROM game
+WHERE id = $1;
+
 -- name: GetUnpickedPlayersForGame :many
 SELECT * FROM player
 WHERE game_id = $1 AND NOT is_picked;

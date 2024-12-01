@@ -8,7 +8,11 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func Index() templ.Component {
+import (
+	"github.com/diogor/oculto/orm"
+)
+
+func Game(game orm.Game, players []orm.Player) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -41,7 +45,43 @@ func Index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"component\" class=\"container\"></main><script>\r\n        var component = document.getElementById(\"component\");\r\n        var form = document.getElementById(\"create_form\");\r\n\r\n        var players = [];\r\n\r\n        function addPlayer(e) {\r\n            e.preventDefault();\r\n\r\n            var name = document.getElementById(\"player\").value;\r\n            players.push(name);\r\n            document.getElementById(\"player\").value = \"\";\r\n        }\r\n\r\n        m.mount(component, {\r\n            view: () => [\r\n                m(\"h1\", \"Criar Amigo Oculto\"),\r\n                m(\"form\", {action: \"/game\", method: \"POST\"}, [\r\n                    m(\"input\", {type: \"text\", name: \"name\", id: \"name\", placeholder: \"Escolha um nome para o amigo oculto\"}),\r\n                    m(\"input\", {type: \"hidden\", name: \"players\", value: players}),\r\n                    [\r\n                        m(\"ul\", players.map((player) => m(\"li\", player)))\r\n                    ],\r\n                    m(\"input\", {type: \"text\", name: \"player\", id: \"player\", placeholder: \"Nome do participante\"}),\r\n                    m(\"button\", {type: \"button\", onclick: addPlayer}, \"Adicionar\"),\r\n                    m(\"button\", {type: \"submit\"}, \"Criar\")\r\n                ])\r\n            ]\r\n        })\r\n    </script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"component\" class=\"container\"><h1>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(game.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/game.templ`, Line: 10, Col: 27}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><select name=\"select\" aria-label=\"Select\" required><option selected disabled value=\"\">Selecione seu pr&oacute;prio nome</option> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, player := range players {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(player.Name)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/game.templ`, Line: 14, Col: 45}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</option>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select> <button>Sortear amigo oculto</button></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

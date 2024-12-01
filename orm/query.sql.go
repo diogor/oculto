@@ -90,6 +90,18 @@ type CreatePlayersParams struct {
 	GameID uuid.UUID
 }
 
+const getGame = `-- name: GetGame :one
+SELECT id, name FROM game
+WHERE id = $1
+`
+
+func (q *Queries) GetGame(ctx context.Context, id uuid.UUID) (Game, error) {
+	row := q.db.QueryRow(ctx, getGame, id)
+	var i Game
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
+}
+
 const getPlayersForGame = `-- name: GetPlayersForGame :many
 SELECT id, name, game_id, has_picked, is_picked FROM player
 WHERE game_id = $1

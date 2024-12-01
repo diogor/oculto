@@ -2,7 +2,7 @@ package templates
 
 templ Index() {
     @Base() {
-    <main id="component">
+    <main id="component" class="container">
     </main>
     <script>
         var component = document.getElementById("component");
@@ -21,7 +21,7 @@ templ Index() {
         m.mount(component, {
             view: () => [
                 m("h1", "Criar Amigo Oculto"),
-                m("form", {action: "/create-game", method: "POST"}, [
+                m("form", {action: "/game", method: "POST"}, [
                     m("input", {type: "text", name: "name", id: "name", placeholder: "Escolha um nome para o amigo oculto"}),
                     m("input", {type: "hidden", name: "players", value: players}),
                     [
