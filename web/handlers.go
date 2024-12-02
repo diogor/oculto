@@ -123,7 +123,6 @@ func GetGameHandler(c *fiber.Ctx) error {
 func PickFriendHandler(c *fiber.Ctx) error {
 	var userId, gameId uuid.UUID
 	var err error
-	var game orm.Game
 
 	userId, err = uuid.Parse(c.FormValue("user_id"))
 
@@ -166,5 +165,16 @@ func PickFriendHandler(c *fiber.Ctx) error {
 		PickedBy: userId,
 		PlayerID: randomPlayer.ID,
 	}
+
+	_, err = queries.CreatePick(c.Context(), params)
+
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	queries.UpdatePicked(c.Context(), randomPlayer.ID)
+	queries.UpdatePicker(c.Context(), userId)
+
+	return render(c, templates.Pick(randomPlayer))
 
 }
