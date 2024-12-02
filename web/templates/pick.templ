@@ -1,0 +1,14 @@
+package templates
+
+import (
+    "github.com/diogor/oculto/orm"
+)
+
+templ Pick(player orm.Player) {
+    @Base() {
+        <main id="component" class="container">
+            <h1>Seu amigo oculto &eacute;:</h1>
+            <h2>{ player.Name }</h2>
+        </main>
+    }
+}

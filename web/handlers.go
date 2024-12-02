@@ -2,13 +2,15 @@ package web
 
 import (
 	"context"
+	"math/rand"
+	"strings"
+
 	"github.com/a-h/templ"
 	"github.com/diogor/oculto/orm"
 	"github.com/diogor/oculto/web/templates"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"strings"
 )
 
 func render(c *fiber.Ctx, component templ.Component) error {
@@ -116,4 +118,53 @@ func GetGameHandler(c *fiber.Ctx) error {
 	}
 
 	return render(c, templates.Game(game, players))
+}
+
+func PickFriendHandler(c *fiber.Ctx) error {
+	var userId, gameId uuid.UUID
+	var err error
+	var game orm.Game
+
+	userId, err = uuid.Parse(c.FormValue("user_id"))
+
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	gameId, err = uuid.Parse(c.Params("game_id"))
+
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	conn := GetConnection()
+	defer conn.Close(c.Context())
+
+	queries := orm.New(conn)
+
+	unpickedPlayers, err := queries.GetUnpickedPlayersForGame(c.Context(), gameId)
+
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	if len(unpickedPlayers) == 0 {
+		return c.Status(400).SendString("No unpicked players")
+	}
+
+	randomPlayer := unpickedPlayers[rand.Intn(len(unpickedPlayers))]
+
+	pickId, err := uuid.NewV7()
+
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	params := orm.CreatePickParams{
+		ID:       pickId,
+		GameID:   gameId,
+		PickedBy: userId,
+		PlayerID: randomPlayer.ID,
+	}
+
 }

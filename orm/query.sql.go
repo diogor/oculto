@@ -163,3 +163,23 @@ func (q *Queries) GetUnpickedPlayersForGame(ctx context.Context, gameID uuid.UUI
 	}
 	return items, nil
 }
+
+const updatePicked = `-- name: UpdatePicked :exec
+UPDATE player SET is_picked = true
+WHERE id = $1
+`
+
+func (q *Queries) UpdatePicked(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, updatePicked, id)
+	return err
+}
+
+const updatePicker = `-- name: UpdatePicker :exec
+UPDATE player SET has_picked = true
+WHERE id = $1
+`
+
+func (q *Queries) UpdatePicker(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, updatePicker, id)
+	return err
+}

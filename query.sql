@@ -28,3 +28,11 @@ VALUES ($1, $2, $3);
 INSERT INTO pick (id, game_id, picked_by, player_id)
 VALUES ($1, $2, $3, $4)
 RETURNING *;
+
+-- name: UpdatePicker :exec
+UPDATE player SET has_picked = true
+WHERE id = $1;
+
+-- name: UpdatePicked :exec
+UPDATE player SET is_picked = true
+WHERE id = $1;
