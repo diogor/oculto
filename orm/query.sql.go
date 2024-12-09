@@ -102,6 +102,41 @@ func (q *Queries) GetGame(ctx context.Context, id uuid.UUID) (Game, error) {
 	return i, err
 }
 
+const getPicksForGameAndPlayer = `-- name: GetPicksForGameAndPlayer :many
+SELECT id, game_id, picked_by, player_id FROM pick
+WHERE game_id = $1 AND player_id = $2
+`
+
+type GetPicksForGameAndPlayerParams struct {
+	GameID   uuid.UUID
+	PlayerID uuid.UUID
+}
+
+func (q *Queries) GetPicksForGameAndPlayer(ctx context.Context, arg GetPicksForGameAndPlayerParams) ([]Pick, error) {
+	rows, err := q.db.Query(ctx, getPicksForGameAndPlayer, arg.GameID, arg.PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Pick
+	for rows.Next() {
+		var i Pick
+		if err := rows.Scan(
+			&i.ID,
+			&i.GameID,
+			&i.PickedBy,
+			&i.PlayerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPlayersForGame = `-- name: GetPlayersForGame :many
 SELECT id, name, game_id, has_picked, is_picked FROM player
 WHERE game_id = $1
@@ -133,13 +168,49 @@ func (q *Queries) GetPlayersForGame(ctx context.Context, gameID uuid.UUID) ([]Pl
 	return items, nil
 }
 
-const getUnpickedPlayersForGame = `-- name: GetUnpickedPlayersForGame :many
+const getPlayersHasNotPickedForGame = `-- name: GetPlayersHasNotPickedForGame :many
 SELECT id, name, game_id, has_picked, is_picked FROM player
-WHERE game_id = $1 AND NOT is_picked
+WHERE game_id = $1 AND NOT has_picked
 `
 
-func (q *Queries) GetUnpickedPlayersForGame(ctx context.Context, gameID uuid.UUID) ([]Player, error) {
-	rows, err := q.db.Query(ctx, getUnpickedPlayersForGame, gameID)
+func (q *Queries) GetPlayersHasNotPickedForGame(ctx context.Context, gameID uuid.UUID) ([]Player, error) {
+	rows, err := q.db.Query(ctx, getPlayersHasNotPickedForGame, gameID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Player
+	for rows.Next() {
+		var i Player
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.GameID,
+			&i.HasPicked,
+			&i.IsPicked,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUnpickedPlayersForGame = `-- name: GetUnpickedPlayersForGame :many
+SELECT id, name, game_id, has_picked, is_picked FROM player
+WHERE game_id = $1 AND id <> $2 AND NOT is_picked
+`
+
+type GetUnpickedPlayersForGameParams struct {
+	GameID uuid.UUID
+	ID     uuid.UUID
+}
+
+func (q *Queries) GetUnpickedPlayersForGame(ctx context.Context, arg GetUnpickedPlayersForGameParams) ([]Player, error) {
+	rows, err := q.db.Query(ctx, getUnpickedPlayersForGame, arg.GameID, arg.ID)
 	if err != nil {
 		return nil, err
 	}

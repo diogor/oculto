@@ -12,8 +12,9 @@ func main() {
 	app.Use(compress.New())
 
 	app.Get("/", web.IndexHandler)
-	app.Get("/:id", web.GetGameHandler)
-	app.Post("/game", web.CreateGameHandler)
+	app.Post("/", web.CreateGameHandler)
+	app.Get("/:game_id", web.GetGameHandler)
+	app.Post("/pick", web.PickFriendHandler)
 
 	app.Use(web.NotFoundMiddleware)
 	log.Fatal(app.Listen(":3000"))

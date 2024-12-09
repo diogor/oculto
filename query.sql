@@ -8,7 +8,11 @@ WHERE id = $1;
 
 -- name: GetUnpickedPlayersForGame :many
 SELECT * FROM player
-WHERE game_id = $1 AND NOT is_picked;
+WHERE game_id = $1 AND id <> $2 AND NOT is_picked;
+
+-- name: GetPlayersHasNotPickedForGame :many
+SELECT * FROM player
+WHERE game_id = $1 AND NOT has_picked;
 
 -- name: CreateGame :one
 INSERT INTO game (id, name)
@@ -36,3 +40,7 @@ WHERE id = $1;
 -- name: UpdatePicked :exec
 UPDATE player SET is_picked = true
 WHERE id = $1;
+
+-- name: GetPicksForGameAndPlayer :many
+SELECT * FROM pick
+WHERE game_id = $1 AND player_id = $2;

@@ -8,13 +8,16 @@ templ Game(game orm.Game, players []orm.Player) {
     @Base() {
         <main id="component" class="container">
             <h1>{ game.Name }</h1>
-            <select name="select" aria-label="Select" required>
+            <form action="/pick" method="POST">
+            <select name="picker_id" aria-label="Select" required>
                 <option selected disabled value="">Selecione seu pr&oacute;prio nome</option>
                     for _, player := range players {
-                        <option>{ player.Name }</option>
+                        <option value={ player.ID.String() }>{ player.Name }</option>
                     }
             </select>
-            <button>Sortear amigo oculto</button>
+            <input type="hidden" name="game_id" value={ game.ID.String() }/>
+            <button type="submit">Sortear</button>
+            </form>
         </main>
     }
 }

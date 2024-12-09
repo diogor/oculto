@@ -89,7 +89,7 @@ func GetGameHandler(c *fiber.Ctx) error {
 	var err error
 	var game orm.Game
 
-	id, err = uuid.Parse(c.Params("id"))
+	id, err = uuid.Parse(c.Params("game_id"))
 
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
@@ -111,7 +111,7 @@ func GetGameHandler(c *fiber.Ctx) error {
 	}
 
 	var players []orm.Player
-	players, err = queries.GetPlayersForGame(c.Context(), id)
+	players, err = queries.GetPlayersHasNotPickedForGame(c.Context(), id)
 
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
@@ -121,27 +121,37 @@ func GetGameHandler(c *fiber.Ctx) error {
 }
 
 func PickFriendHandler(c *fiber.Ctx) error {
-	var userId, gameId uuid.UUID
+	var pickerId, gameId uuid.UUID
 	var err error
 
-	userId, err = uuid.Parse(c.FormValue("user_id"))
+	pickerId, err = uuid.Parse(c.FormValue("picker_id"))
 
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
 
-	gameId, err = uuid.Parse(c.Params("game_id"))
+	gameId, err = uuid.Parse(c.FormValue("game_id"))
 
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
 
 	conn := GetConnection()
-	defer conn.Close(c.Context())
+	defer func(conn *pgx.Conn, ctx context.Context) {
+		err := conn.Close(ctx)
+		if err != nil {
+			panic(err)
+		}
+	}(conn, c.Context())
 
 	queries := orm.New(conn)
 
-	unpickedPlayers, err := queries.GetUnpickedPlayersForGame(c.Context(), gameId)
+	UpParams := orm.GetUnpickedPlayersForGameParams{
+		GameID: gameId,
+		ID:     pickerId,
+	}
+
+	unpickedPlayers, err := queries.GetUnpickedPlayersForGame(c.Context(), UpParams)
 
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
@@ -149,6 +159,12 @@ func PickFriendHandler(c *fiber.Ctx) error {
 
 	if len(unpickedPlayers) == 0 {
 		return c.Status(400).SendString("No unpicked players")
+	}
+
+	for i, uplayer := range unpickedPlayers {
+		if pickerId == uplayer.ID {
+			unpickedPlayers = append(unpickedPlayers[:i], unpickedPlayers[i+1:]...)
+		}
 	}
 
 	randomPlayer := unpickedPlayers[rand.Intn(len(unpickedPlayers))]
@@ -162,7 +178,7 @@ func PickFriendHandler(c *fiber.Ctx) error {
 	params := orm.CreatePickParams{
 		ID:       pickId,
 		GameID:   gameId,
-		PickedBy: userId,
+		PickedBy: pickerId,
 		PlayerID: randomPlayer.ID,
 	}
 
@@ -172,9 +188,14 @@ func PickFriendHandler(c *fiber.Ctx) error {
 		return c.Status(500).SendString(err.Error())
 	}
 
-	queries.UpdatePicked(c.Context(), randomPlayer.ID)
-	queries.UpdatePicker(c.Context(), userId)
+	err = queries.UpdatePicked(c.Context(), randomPlayer.ID)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+	err = queries.UpdatePicker(c.Context(), pickerId)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
 
 	return render(c, templates.Pick(randomPlayer))
-
 }
